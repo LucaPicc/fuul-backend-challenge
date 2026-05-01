@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   renderActionSummary,
   renderCart,
+  renderError,
   renderTitle,
   renderTotalBreakdown,
 } from '../src/cli-renderer.js';
@@ -13,6 +14,15 @@ const withoutColors = { colors: false };
 describe('CLI renderer', () => {
   it('renders the title without color codes', () => {
     expect(renderTitle(withoutColors)).toBe('NFT Marketplace Checkout Simulator');
+  });
+
+  it('renders the title with color codes by default', () => {
+    expect(renderTitle()).toContain('\u001b[36m');
+    expect(renderTitle()).toContain('\u001b[1m');
+  });
+
+  it('renders errors without color codes', () => {
+    expect(renderError('Invalid product', withoutColors)).toBe('Invalid product');
   });
 
   it('renders an empty cart', () => {
@@ -70,6 +80,37 @@ describe('CLI renderer', () => {
         'Regular total: 225 ETH',
         'Discounts: -75 ETH',
         'Total: 150 ETH',
+      ].join('\n'),
+    );
+  });
+
+  it('renders total breakdown without applied discounts', () => {
+    const summary: CheckoutSummary = {
+      regularTotal: 4,
+      discountTotal: 0,
+      finalTotal: 4,
+      lines: [
+        {
+          productCode: 'MEEBIT',
+          quantity: 1,
+          unitPrice: 4,
+          regularSubtotal: 4,
+          finalSubtotal: 4,
+          discountAmount: 0,
+          appliedDiscountName: null,
+        },
+      ],
+    };
+
+    expect(renderTotalBreakdown(summary, withoutColors)).toBe(
+      [
+        'Product  Qty  Unit   Regular  Discount  Subtotal',
+        '-------  ---  -----  -------  --------  --------',
+        'MEEBIT   1    4 ETH  4 ETH    none      4 ETH   ',
+        '',
+        'Regular total: 4 ETH',
+        'Discounts: -0 ETH',
+        'Total: 4 ETH',
       ].join('\n'),
     );
   });

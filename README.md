@@ -45,6 +45,48 @@ console.log(checkout.summary());
 
 `summary()` returns regular totals, applied discounts, final totals, and per-product lines. The CLI uses this method to display discount details without duplicating pricing logic.
 
+## Total Calculation Flow
+
+```mermaid
+flowchart TD
+  A[CLI or tests] --> B[Checkout.scan/remove]
+  B --> C[Cart grouped by product]
+  C --> D[Checkout.summary/total]
+  D --> E[PriceProvider.getPrice]
+  D --> F[DiscountRule list]
+  F --> G[Applicable rules for product]
+  G --> H[Calculate subtotal per rule]
+  H --> I[Choose lowest subtotal]
+  I --> J[Final subtotal per product]
+  J --> K[Final total]
+```
+
+## Adding a New Discount
+
+New discounts are added by implementing the `DiscountRule` contract and registering the rule in `defaultDiscountRules`. `Checkout` does not need to change because it only receives a list of rules and chooses the best subtotal.
+
+```typescript
+export class MeebitVolumeDiscountRule implements DiscountRule {
+  readonly name = 'meebit-volume-10-percent-off';
+
+  appliesTo(productCode: ProductCode): boolean {
+    return productCode === 'MEEBIT';
+  }
+
+  calculateSubtotal({ quantity, unitPrice }: DiscountContext): number {
+    return quantity >= 5 ? quantity * unitPrice * 0.9 : quantity * unitPrice;
+  }
+}
+```
+
+## Current Limitations
+
+Discounts are evaluated per product group, not across the full cart. A rule can apply to multiple product codes, but it still receives one product at a time.
+
+For example, the current design supports `APE x3` or `AZUKI x3` as separate buy-2-get-1-free cases. It does not support a mixed promotion such as `APE x2 + AZUKI x1`, where the customer pays for the two `APE` items and gets the cheaper `AZUKI` discounted.
+
+Supporting cross-product promotions would require cart-level discount rules that receive the full cart and price map before calculating the discount.
+
 ## Setup
 
 Use Node `24` as specified in `.nvmrc`.
@@ -64,12 +106,22 @@ Runs the interactive checkout simulator. It lets you scan items, remove items, v
 
 ```bash
 pnpm test
+pnpm test:coverage
 pnpm lint
 pnpm typecheck
 pnpm format:check
 ```
 
-Runs tests, ESLint, TypeScript checks, and Prettier validation.
+Runs tests, coverage validation, ESLint, TypeScript checks, and Prettier validation.
+
+## CI Pipelines
+
+GitHub Actions runs two workflows on `push` to `main` and on pull requests:
+
+- `Lint`: installs dependencies, checks formatting, runs ESLint, and runs TypeScript checks.
+- `Test`: installs dependencies, runs tests with coverage, and uploads the `coverage/` report as an artifact.
+
+Coverage is configured in `vitest.config.ts` with an 80% global threshold for statements, branches, functions, and lines.
 
 ## Simulator
 
