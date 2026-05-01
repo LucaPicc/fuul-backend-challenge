@@ -1,0 +1,33 @@
+{
+  "name": "fuul-backend-challenge",
+  "version": "1.0.0",
+  "description": "Backend challenge for Fuul",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx src/cli.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "typecheck": "sh -c 'if find src tests -name \"*.ts\" -print -quit 2>/dev/null | grep -q .; then tsc --noEmit; else echo \"No TypeScript files to type-check\"; fi'",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.33.2",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@inquirer/prompts": "^8.4.2",
+    "@types/node": "^25.6.0",
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.3",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.1",
+    "vitest": "^4.1.5"
+  }
+}
