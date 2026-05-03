@@ -114,12 +114,11 @@ pnpm format:check
 
 Runs tests, coverage validation, ESLint, TypeScript checks, and Prettier validation.
 
-## CI Pipelines
+## CI Pipeline
 
-GitHub Actions runs two workflows on `push` to `main` and on pull requests:
+GitHub Actions runs a single `CI` workflow on `push` to `main` and on pull requests.
 
-- `Lint`: installs dependencies, checks formatting, runs ESLint, and runs TypeScript checks.
-- `Test`: installs dependencies, runs tests with coverage, and uploads the `coverage/` report as an artifact.
+The workflow installs dependencies, checks formatting, runs ESLint, runs TypeScript checks, runs tests with coverage, and uploads the `coverage/` report as an artifact.
 
 Coverage is configured in `vitest.config.ts` with an 80% global threshold for statements, branches, functions, and lines.
 
